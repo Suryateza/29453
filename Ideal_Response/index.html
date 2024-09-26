@@ -3,50 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>@import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
 
-        * {
-          box-sizing: border-box;
-         
-        }
-        
-        body {
-          background-color: #383838;
-          font-family: 'Muli', sans-serif;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          height: 100vh;
-          overflow: hidden;
-          margin: 0;
-        }
-        
-        .key {
-          border: 1px solid #999999;
-          background-color: #2B2B2B;
-          box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-          display: inline-flex;
-          align-items: center;
-          font-size: 20px;
-          font-weight: bold;
-          padding: 20px;
-          flex-direction: column;
-          margin: 10px;
-          min-width: 150px;
-          color: white;
-          position: relative;
-        }
-        
-        .key small {
-          position: absolute;
-          top: -24px;
-          left: 0;
-          text-align: center;
-          width: 100%;
-          color: #c4c4c4;
-          font-size: 14px;
-        }</style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #383838;
+        font-family: 'Muli', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100vh;
+        overflow: hidden;
+        margin: 0;
+      }
+
+      .key {
+        border: 1px solid #999999;
+        background-color: #2B2B2B;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 20px;
+        flex-direction: column;
+        margin: 10px;
+        min-width: 150px;
+        color: white;
+        position: relative;
+      }
+
+      .key small {
+        position: absolute;
+        top: -24px;
+        left: 0;
+        text-align: center;
+        width: 100%;
+        color: #c4c4c4;
+        font-size: 14px;
+      }
+
+      #history {
+        margin-top: 20px;
+        color: #c4c4c4;
+        font-size: 18px;
+      }
+
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+      }
+
+      .dark-mode {
+        background-color: #c4c4c4;
+        color: #383838;
+      }
+    </style>
     <title>Event KeyCodes</title>
   </head>
   <body>
@@ -55,11 +78,22 @@
         Press any key to get the keyCode
       </div>
     </div>
-    <script>const insert = document.getElementById('insert')
 
-        window.addEventListener('keydown', (event) => {
-          insert.innerHTML = `
-          <div class="key">
+    <div id="history"></div>
+    <button id="reset-btn">Reset</button>
+    <button id="toggle-mode">Toggle Dark/Light Mode</button>
+
+    <script>
+      const insert = document.getElementById('insert');
+      const historyDiv = document.getElementById('history');
+      const resetBtn = document.getElementById('reset-btn');
+      const toggleModeBtn = document.getElementById('toggle-mode');
+      let history = [];
+      let darkMode = true;
+
+      window.addEventListener('keydown', (event) => {
+        insert.innerHTML = `
+        <div class="key">
           ${event.key === ' ' ? 'Space' : event.key} 
           <small>event.key</small>
         </div>
@@ -73,7 +107,36 @@
           ${event.code}
           <small>event.code</small>
         </div>
-          `
-        })</script>
+        `;
+
+        // Add event to history
+        const historyEntry = `${event.key} (${event.keyCode})`;
+        if (history.length >= 5) {
+          history.shift(); // Keep only the last 5 entries
+        }
+        history.push(historyEntry);
+        historyDiv.innerHTML = `<strong>Key History:</strong> ${history.join(', ')}`;
+      });
+
+      resetBtn.addEventListener('click', () => {
+        insert.innerHTML = `<div class="key">Press any key to get the keyCode</div>`;
+        historyDiv.innerHTML = '';
+        history = [];
+      });
+
+      toggleModeBtn.addEventListener('click', () => {
+        darkMode = !darkMode;
+        document.body.classList.toggle('dark-mode', !darkMode);
+        toggleModeBtn.textContent = darkMode ? 'Toggle Dark Mode' : 'Toggle Light Mode';
+      });
+
+      // Detect key combinations (e.g., Ctrl + S)
+      window.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === 's') {
+          event.preventDefault(); // Prevent browser save action
+          alert('Ctrl + S detected!');
+        }
+      });
+    </script>
   </body>
 </html>
