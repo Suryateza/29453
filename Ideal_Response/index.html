@@ -73,7 +73,6 @@
         margin-top: 10px;
       }
 
-      /* Change key history color when in light mode */
       .dark-mode #history {
         color: black;
       }
@@ -145,17 +144,26 @@
     <div class="button-container">
       <button id="reset-btn">Reset</button>
       <button id="toggle-mode">Toggle Dark/Light Mode</button>
+      <button id="copy-details">Copy Key Details</button>
     </div>
+
+    <audio id="keypress-sound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
 
     <script>
       const insert = document.getElementById('insert');
       const historyDiv = document.getElementById('history');
       const resetBtn = document.getElementById('reset-btn');
       const toggleModeBtn = document.getElementById('toggle-mode');
+      const copyDetailsBtn = document.getElementById('copy-details');
+      const keypressSound = document.getElementById('keypress-sound');
       let history = [];
       let darkMode = true;
 
       window.addEventListener('keydown', (event) => {
+        keypressSound.play();  // Play sound on key press
+
+        const timestamp = new Date().toLocaleTimeString();  // Capture timestamp
+
         insert.innerHTML = `
         <div class="container">
           <div class="key">
@@ -172,12 +180,17 @@
             ${event.code}
             <small>event.code</small>
           </div>
+
+          <div class="key">
+            ${timestamp}
+            <small>Timestamp</small>
+          </div>
         </div>`;
 
-        // Add event to history
-        const historyEntry = `${event.key} (${event.keyCode})`;
-        if (history.length >= 5) {
-          history.shift(); // Keep only the last 5 entries
+        // Add event to history with timestamp
+        const historyEntry = `${event.key} (${event.keyCode}) at ${timestamp}`;
+        if (history.length >= 10) {
+          history.shift();  // Keep only the last 10 entries
         }
         history.push(historyEntry);
         historyDiv.innerHTML = `<strong>Key History:</strong> ${history.join(', ')}`;
@@ -198,17 +211,27 @@
         toggleModeBtn.textContent = darkMode ? 'Toggle Dark Mode' : 'Toggle Light Mode';
 
         // Change key history text color based on mode
-        if (darkMode) {
-          historyDiv.style.color = '#c4c4c4'; // Dark mode color
-        } else {
-          historyDiv.style.color = 'black'; // Light mode color
+        historyDiv.style.color = darkMode ? '#c4c4c4' : 'black';
+      });
+
+      copyDetailsBtn.addEventListener('click', () => {
+        // Copy the last key entry details to the clipboard
+        if (history.length > 0) {
+          const lastEntry = history[history.length - 1];
+          navigator.clipboard.writeText(lastEntry)
+            .then(() => {
+              alert('Key details copied to clipboard!');
+            })
+            .catch((err) => {
+              console.error('Failed to copy key details:', err);
+            });
         }
       });
 
       // Detect key combinations (e.g., Ctrl + S)
       window.addEventListener('keydown', (event) => {
         if (event.ctrlKey && event.key === 's') {
-          event.preventDefault(); // Prevent browser save action
+          event.preventDefault();  // Prevent browser save action
           alert('Ctrl + S detected!');
         }
       });
