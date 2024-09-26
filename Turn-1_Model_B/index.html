@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeyPress Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #c4c4c4;
+            color: #333;
+        }
+
+        .dark-mode {
+            background-color: #383838;
+            color: #ddd;
+        }
+
+        #modeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .key-info, .history-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .key-info:hover {
+            transform: translateY(-3px);
+        }
+
+        #keyHistory {
+            width: 80%;
+            max-width: 600px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="modeToggle">Toggle Dark/Light</button>
+    <h1>KeyPress Detector</h1>
+    <div id="currentKey" class="key-info">Press any key...</div>
+    <button id="copyDetails">Copy Key Details</button>
+    <button id="reset">Reset</button>
+    <div id="keyHistory"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentKeyDiv = document.getElementById('currentKey');
+        const keyHistoryDiv = document.getElementById('keyHistory');
+        const modeToggle = document.getElementById('modeToggle');
+        const copyButton = document.getElementById('copyDetails');
+        const resetButton = document.getElementById('reset');
+        let keyHistory = [];
+        const audio = new Audio('https://www.soundjay.com/button/sounds/button-1.mp3'); // Placeholder for sound
+
+        // Function to update UI with key details
+        function updateKeyInfo(e) {
+            const timeStamp = new Date().toLocaleTimeString();
+            const keyInfo = {
+                key: e.key === ' ' ? 'Space' : e.key,
+                keyCode: e.keyCode,
+                code: e.code,
+                timeStamp: timeStamp
+            };
+            currentKeyDiv.innerHTML = `
+                <strong>Key:</strong> ${keyInfo.key}<br>
+                <strong>KeyCode:</strong> ${keyInfo.keyCode}<br>
+                <strong>Code:</strong> ${keyInfo.code}<br>
+                <strong>Time:</strong> ${keyInfo.timeStamp}
+            `;
+            keyHistory.push(keyInfo);
+            if (keyHistory.length > 10) keyHistory.shift();
+            updateKeyHistory();
+            audio.play();
+        }
+
+        // Update key history display
+        function updateKeyHistory() {
+            keyHistoryDiv.innerHTML = keyHistory.map((item, index) => 
+                `<div class="history-item">Key: ${item.key}, Code: ${item.keyCode}, Time: ${item.timeStamp}</div>`
+            ).join('');
+        }
+
+        // Toggle dark/light mode
+        modeToggle.onclick = function() {
+            document.body.classList.toggle('dark-mode');
+        };
+
+        // Copy key details to clipboard
+        copyButton.onclick = function() {
+            navigator.clipboard.writeText(currentKeyDiv.innerText.replace(/\n/g, ' '));
+        };
+
+        // Reset all information
+        resetButton.onclick = function() {
+            currentKeyDiv.textContent = 'Press any key...';
+            keyHistory = [];
+            updateKeyHistory();
+        };
+
+        // Detect key press
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                alert('Ctrl+S detected! Your work is saved!');
+            }
+            updateKeyInfo(e);
+        });
+
+        // Initial dark mode check
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-mode');
+        }
+    });
+    </script>
+</body>
+</html>
